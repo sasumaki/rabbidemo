@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  rabbit:
+    image: rabbitmq:3-management
+    expose:
+      - "5672"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    container_name: rabbit
+
+  producer:
+    build: "./producer"
+    container_name: rabbitproducer
+    restart: unless-stopped
+    depends_on:
+      - rabbit
+    environment:
+      - RABBIT_URI=amqp://rabbit:5672/
+
+  consumer:
+    build: "./consumer"
+    restart:  unless-stopped
+    depends_on:
+      - rabbit
+    volumes:
+      - ./progress.txt:/usr/src/app/progress.txt
+    environment:
+      - RABBIT_URI=amqp://rabbit:5672/
